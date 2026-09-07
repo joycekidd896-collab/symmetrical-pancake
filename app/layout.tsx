@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Joyce's Elite Coupons",
-  description: "Local coupons and savings from Joyce's Elite Coupons."
+  title: "Coupon Queen | The Crown Jewel of Savings",
+  description:
+    "Discover local deals, coupons, and savings with Coupon Queen — The Crown Jewel of Savings."
 };
 
 export default function RootLayout({
@@ -16,4 +17,4 @@ export default function RootLayout({
       <body>{children}</body>
     </html>
   );
-      }
+}
