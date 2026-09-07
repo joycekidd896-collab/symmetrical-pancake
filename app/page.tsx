@@ -1,71 +1,157 @@
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gray-50">
-      <section className="border-b bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-gray-500">
-              Local Deals • Coupons • Savings
+    <main className="queen-page">
+      <header className="site-header">
+        <div className="brand-wrap">
+          <div className="brand-crown">♕</div>
+          <div>
+            <div className="brand-name">COUPON QUEEN</div>
+            <div className="brand-tagline">The Crown Jewel of Savings</div>
+          </div>
+        </div>
+
+        <div className="header-sparkle" aria-hidden="true">
+          ✦
+        </div>
+      </header>
+
+      <section className="hero-section">
+        <div className="hero-diamond diamond-one" aria-hidden="true">
+          ◆
+        </div>
+        <div className="hero-diamond diamond-two" aria-hidden="true">
+          ✦
+        </div>
+        <div className="hero-sparkle sparkle-one" aria-hidden="true">
+          ✧
+        </div>
+        <div className="hero-sparkle sparkle-two" aria-hidden="true">
+          ✦
+        </div>
+
+        <div className="hero-content">
+          <div className="royal-badge">
+            <span>♛</span>
+            <span>YOUR SAVINGS ROYALTY</span>
+            <span>♛</span>
+          </div>
+
+          <h1>
+            Find Deals Worth
+            <span> Crowning</span>
+          </h1>
+
+          <p className="hero-description">
+            Discover beautiful savings, local deals, and money-saving coupons
+            all in one royal destination.
+          </p>
+
+          <div className="hero-actions">
+            <button type="button" className="queen-button primary-button">
+              <span>🎟️</span>
+              Browse Coupons
+              <span className="button-arrow">→</span>
+            </button>
+
+            <button type="button" className="queen-button secondary-button">
+              For Local Businesses
+              <span className="button-arrow">→</span>
+            </button>
+          </div>
+
+          <div className="savings-pointer">
+            <span className="pointer-arrow">↘</span>
+            <span>Fresh deals. Real savings. Every day.</span>
+          </div>
+        </div>
+
+        <div className="royal-card-preview">
+          <div className="card-crown">♛</div>
+          <div className="card-label">FEATURED SAVINGS</div>
+          <div className="card-diamond">◇</div>
+          <div className="card-title">Your Next Great Deal</div>
+          <div className="card-copy">
+            Save more. Shop smarter.
+          </div>
+          <div className="coupon-ribbon">COUPON</div>
+        </div>
+      </section>
+
+      <section className="benefits-section">
+        <div className="section-heading">
+          <div className="section-kicker">THE QUEEN'S COLLECTION</div>
+          <h2>Everything You Need to Save in Style</h2>
+          <p>
+            Your favorite deals, local savings, and business offers —
+            beautifully brought together.
+          </p>
+        </div>
+
+        <div className="benefit-grid">
+          <article className="benefit-card">
+            <div className="card-icon turquoise-icon">💎</div>
+            <div className="card-number">01</div>
+            <h3>Local Deals</h3>
+            <p>
+              Discover valuable offers from businesses right in your
+              community.
             </p>
-
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              Joyce&apos;s Elite Coupons
-            </h1>
-
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              Discover local deals, save money, and find great offers from
-              businesses in your community.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                className="rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-700"
-              >
-                Browse Coupons
-              </button>
-
-              <button
-                type="button"
-                className="rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
-              >
-                For Local Businesses
-              </button>
+            <div className="card-link">
+              Explore deals <span>→</span>
             </div>
-          </div>
+          </article>
+
+          <article className="benefit-card featured-card">
+            <div className="card-icon gold-icon">🎟️</div>
+            <div className="card-number">02</div>
+            <h3>Easy Savings</h3>
+            <p>
+              Find coupons and special offers without the hassle of hunting
+              everywhere.
+            </p>
+            <div className="card-link">
+              Start saving <span>→</span>
+            </div>
+          </article>
+
+          <article className="benefit-card">
+            <div className="card-icon espresso-icon">👑</div>
+            <div className="card-number">03</div>
+            <h3>Local Businesses</h3>
+            <p>
+              Help great local businesses reach customers with offers worth
+              sharing.
+            </p>
+            <div className="card-link">
+              Join the kingdom <span>→</span>
+            </div>
+          </article>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Local Deals
-            </h2>
-            <p className="mt-3 text-gray-600">
-              Find savings and special offers from businesses near you.
-            </p>
-          </div>
+      <section className="royal-banner">
+        <div className="banner-diamond" aria-hidden="true">
+          ◆
+        </div>
 
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Easy Savings
-            </h2>
-            <p className="mt-3 text-gray-600">
-              Browse coupons and discover ways to save on everyday purchases.
-            </p>
-          </div>
+        <div>
+          <div className="banner-kicker">YOUR SAVINGS. YOUR KINGDOM.</div>
+          <h2>Every Great Deal Deserves a Crown.</h2>
+        </div>
 
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Local Businesses
-            </h2>
-            <p className="mt-3 text-gray-600">
-              A place for local merchants to share deals with their community.
-            </p>
-          </div>
+        <div className="banner-crown" aria-hidden="true">
+          ♕
         </div>
       </section>
+
+      <footer className="site-footer">
+        <div className="footer-brand">
+          <span>♕</span>
+          COUPON QUEEN
+        </div>
+        <div className="footer-tagline">The Crown Jewel of Savings</div>
+        <div className="footer-sparkles">✦ ✧ ✦</div>
+      </footer>
     </main>
   );
 }
