@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HomePage() {
   return (
     <main className="queen-page">
@@ -9,6 +11,11 @@ export default function HomePage() {
             <div className="brand-tagline">The Crown Jewel of Savings</div>
           </div>
         </div>
+
+        <nav aria-label="Main navigation">
+          <Link href="/coupons">Coupons</Link>
+          <Link href="/businesses">Businesses</Link>
+        </nav>
 
         <div className="header-sparkle" aria-hidden="true">
           ✦
@@ -47,16 +54,16 @@ export default function HomePage() {
           </p>
 
           <div className="hero-actions">
-            <button type="button" className="queen-button primary-button">
+            <Link href="/coupons" className="queen-button primary-button">
               <span>🎟️</span>
               Browse Coupons
               <span className="button-arrow">→</span>
-            </button>
+            </Link>
 
-            <button type="button" className="queen-button secondary-button">
+            <Link href="/businesses" className="queen-button secondary-button">
               For Local Businesses
               <span className="button-arrow">→</span>
-            </button>
+            </Link>
           </div>
 
           <div className="savings-pointer">
@@ -96,9 +103,9 @@ export default function HomePage() {
               Discover valuable offers from businesses right in your
               community.
             </p>
-            <div className="card-link">
+            <Link href="/coupons" className="card-link">
               Explore deals <span>→</span>
-            </div>
+            </Link>
           </article>
 
           <article className="benefit-card featured-card">
@@ -109,9 +116,9 @@ export default function HomePage() {
               Find coupons and special offers without the hassle of hunting
               everywhere.
             </p>
-            <div className="card-link">
+            <Link href="/coupons" className="card-link">
               Start saving <span>→</span>
-            </div>
+            </Link>
           </article>
 
           <article className="benefit-card">
@@ -122,9 +129,9 @@ export default function HomePage() {
               Help great local businesses reach customers with offers worth
               sharing.
             </p>
-            <div className="card-link">
+            <Link href="/businesses" className="card-link">
               Join the kingdom <span>→</span>
-            </div>
+            </Link>
           </article>
         </div>
       </section>
