@@ -3,11 +3,18 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getCoupon } from "../../../lib/coupons";
+import { getCoupon, type Coupon } from "../../../lib/coupons";
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+type LiveOfferRow = { id: string; discount: string; title: string; description: string | null; category: string | null; location: string | null; expires: string | null; active: boolean; businesses?: { name: string } | null };
 
 export default function CouponDetailPage() {
   const params = useParams<{ id: string }>();
-  const coupon = getCoupon(params.id);
+  const id = params.id;
+  const [coupon, setCoupon] = useState<Coupon | null | undefined>(() => getCoupon(id));
+  const [loadingLive, setLoadingLive] = useState(id?.startsWith("live-") ?? false);
   const [redeemed, setRedeemed] = useState(false);
   const [redemptionCode, setRedemptionCode] = useState("");
   const [copied, setCopied] = useState(false);
@@ -15,23 +22,45 @@ export default function CouponDetailPage() {
   const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
+    const staticCoupon = getCoupon(id);
+    setCoupon(staticCoupon);
+    if (!id?.startsWith("live-") || !SUPABASE_URL || !SUPABASE_KEY) { setLoadingLive(false); return; }
+    let cancelled = false;
+    const loadLiveOffer = async () => {
+      try {
+        const offerId = id.slice("live-".length);
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/business_offers?id=eq.${encodeURIComponent(offerId)}&active=eq.true&select=id,discount,title,description,category,location,expires,active,businesses(name)`, { headers: { apikey: SUPABASE_KEY }, cache: "no-store" });
+        if (!response.ok) throw new Error("Could not load offer");
+        const rows: LiveOfferRow[] = await response.json();
+        const row = rows[0];
+        if (!cancelled) setCoupon(row ? { id: `live-${row.id}`, discount: row.discount, title: row.title, business: row.businesses?.name || "Local Business", category: row.category || "Other", location: row.location || "Local", description: row.description || "A live offer from the Coupon Queen Business Kingdom.", expires: row.expires || "Active offer", terms: ["One redemption per customer.", "Merchant terms may apply."] } : null);
+      } catch { if (!cancelled) setCoupon(null); }
+      finally { if (!cancelled) setLoadingLive(false); }
+    };
+    loadLiveOffer();
+    return () => { cancelled = true; };
+  }, [id]);
+
+  useEffect(() => {
     if (!coupon) return;
     const stored = window.localStorage.getItem(`coupon-queen-redemption-${coupon.id}`);
     if (stored) { setRedemptionCode(stored); setRedeemed(true); }
   }, [coupon]);
 
-  if (!coupon) return <main className="queen-page"><section className="coupon-not-found"><div className="card-icon gold-icon">👑</div><h1>That deal has left the kingdom</h1><p>We could not find this coupon. Browse the Deal Vault for the latest offers.</p><Link href="/coupons" className="queen-button primary-button">Back to Deal Vault</Link></section></main>;
+  if (loadingLive || coupon === undefined) return <main className="queen-page"><section className="coupon-not-found"><div className="card-icon gold-icon">♕</div><h1>Opening the Deal Vault…</h1><p>We're checking the merchant's live offer.</p></section></main>;
+  if (!coupon) return <main className="queen-page"><section className="coupon-not-found"><div className="card-icon gold-icon">👑</div><h1>That deal is no longer active</h1><p>This offer may have been paused, removed, or already left the kingdom. Browse the Deal Vault for current offers.</p><Link href="/coupons" className="queen-button primary-button">Back to Deal Vault</Link></section></main>;
 
   const handleRedeem = async () => {
     if (redeemed || saving) return;
     setSaving(true); setSaveError("");
-    const code = `QUEEN-${coupon.id.replace("queen-", "")}-${crypto.randomUUID().replaceAll("-", "").slice(0, 6).toUpperCase()}`;
+    const code = `QUEEN-${coupon.id.replace("queen-", "").replace("live-", "LIVE-")}-${crypto.randomUUID().replaceAll("-", "").slice(0, 6).toUpperCase()}`;
     try {
       const response = await fetch("https://unpgjnlhcbtbspcehfsw.supabase.co/functions/v1/redeem-coupon", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ coupon_id: coupon.id, redemption_code: code }) });
       if (!response.ok) throw new Error("Redemption could not be recorded");
       window.localStorage.setItem(`coupon-queen-redemption-${coupon.id}`, code);
       setRedemptionCode(code); setRedeemed(true);
-    } catch { setSaveError("We couldn't connect to the redemption vault. Please try again. Your deal has not been claimed."); } finally { setSaving(false); }
+    } catch { setSaveError("We couldn't connect to the redemption vault. Please try again. Your deal has not been claimed."); }
+    finally { setSaving(false); }
   };
   const handleCopy = async () => { try { await navigator.clipboard.writeText(redemptionCode); setCopied(true); window.setTimeout(() => setCopied(false), 1800); } catch { setCopied(false); } };
 
