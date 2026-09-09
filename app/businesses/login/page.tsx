@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Coupon Queen is intentionally pinned to its production Supabase project.
+// NEXT_PUBLIC_* values can be misconfigured in hosting environments; the
+// publishable key is safe for browser use and is protected by RLS.
+const SUPABASE_URL = "https://unpgjnlhcbtbspcehfsw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b4o1HJPZOaYsQupzz4F9YA_XLt5obuK";
 
 export default function MerchantLoginPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -34,7 +37,6 @@ export default function MerchantLoginPage() {
     setError("");
     setMessage("");
     try {
-      if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error("Supabase is not configured for this site yet.");
       const endpoint = mode === "signup" ? "/auth/v1/signup" : "/auth/v1/token?grant_type=password";
       const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
         method: "POST",
