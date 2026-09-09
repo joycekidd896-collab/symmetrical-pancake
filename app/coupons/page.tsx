@@ -1,25 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { coupons } from "../../lib/coupons";
+import { useCallback, useMemo, useState } from "react";
+import { coupons, type Coupon } from "../../lib/coupons";
+import LiveOffers from "./LiveOffers";
 
-const categories = ["All Deals", "Dining", "Shopping", "Beauty", "Online"];
+const categories = ["All Deals", "Dining", "Shopping", "Beauty", "Services", "Online", "Other"];
 
 export default function CouponsPage() {
   const [activeCategory, setActiveCategory] = useState("All Deals");
   const [query, setQuery] = useState("");
+  const [liveOffers, setLiveOffers] = useState<Coupon[]>([]);
+  const onLiveOffers = useCallback((offers: Coupon[]) => setLiveOffers(offers), []);
+  const allCoupons = useMemo(() => [...liveOffers, ...coupons], [liveOffers]);
   const filteredCoupons = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return coupons.filter((coupon) => {
+    return allCoupons.filter((coupon) => {
       const matchesCategory = activeCategory === "All Deals" || coupon.category === activeCategory;
       const matchesQuery = !normalizedQuery || `${coupon.title} ${coupon.business} ${coupon.category} ${coupon.location}`.toLowerCase().includes(normalizedQuery);
       return matchesCategory && matchesQuery;
     });
-  }, [activeCategory, query]);
+  }, [activeCategory, query, allCoupons]);
 
   return (
     <main className="queen-page">
+      <LiveOffers onLoad={onLiveOffers} />
       <header className="site-header"><Link href="/" className="brand-wrap" aria-label="Coupon Queen home"><div className="brand-crown">♕</div><div><div className="brand-name">COUPON QUEEN</div><div className="brand-tagline">The Crown Jewel of Savings</div></div></Link><nav aria-label="Main navigation"><Link href="/coupons" aria-current="page">Coupons</Link><Link href="/businesses">Businesses</Link></nav><div className="header-sparkle">✦</div></header>
       <section className="benefits-section"><div className="section-heading"><div className="section-kicker">♛ THE DEAL VAULT ♛</div><h1>Coupons Worth Crowning</h1><p>Search the royal collection, choose a category, and discover your next favorite deal.</p></div>
         <div className="coupon-toolbar"><label className="coupon-search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search deals, businesses, or categories..." aria-label="Search coupons" /></label><div className="coupon-filters" role="tablist">{categories.map((category) => <button key={category} type="button" role="tab" aria-selected={activeCategory === category} className={`filter-pill ${activeCategory === category ? "active" : ""}`} onClick={() => setActiveCategory(category)}>{category}</button>)}</div></div>
