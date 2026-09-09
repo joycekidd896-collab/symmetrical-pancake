@@ -20,8 +20,32 @@ export default function MerchantOnboardingPage() {
     const selected = localStorage.getItem("cq_selected_plan");
     if (selected === "growth" || selected === "starter") setPlan(selected);
     const token = localStorage.getItem("cq_access_token");
-    if (!token) window.location.href = `/businesses/login?mode=signup&plan=${selected === "growth" ? "growth" : "starter"}`;
-    else setLoading(false);
+    if (!token) {
+      window.location.href = `/businesses/login?mode=signup&plan=${selected === "growth" ? "growth" : "starter"}`;
+      return;
+    }
+    const loadExisting = async () => {
+      if (!URL || !KEY) { setError("Merchant database is not configured."); setLoading(false); return; }
+      try {
+        const headers = { apikey: KEY, Authorization: `Bearer ${token}` };
+        const userRes = await fetch(`${URL}/auth/v1/user`, { headers, cache: "no-store" });
+        if (!userRes.ok) throw new Error("Your merchant session has expired. Please sign in again.");
+        const user = await userRes.json();
+        const existingRes = await fetch(`${URL}/rest/v1/businesses?owner_id=eq.${encodeURIComponent(user.id)}&select=id,name,location,category,description&order=created_at.asc&limit=1`, { headers, cache: "no-store" });
+        if (!existingRes.ok) throw new Error("Could not check your business profile.");
+        const existing = await existingRes.json();
+        const business = existing[0];
+        if (business) {
+          setName(business.name || "");
+          setLocation(business.location || "");
+          setCategory(business.category || "Dining");
+          setDescription(business.description || "");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Could not load your business profile.");
+      } finally { setLoading(false); }
+    };
+    loadExisting();
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -39,6 +63,7 @@ export default function MerchantOnboardingPage() {
       if (!existingRes.ok) throw new Error("Could not check your business profile.");
       const existing = await existingRes.json();
       if (!existing[0]?.id) {
+        if (!name.trim()) throw new Error("Please enter your business name.");
         const createRes = await fetch(`${URL}/rest/v1/businesses`, { method: "POST", headers: { ...headers, Prefer: "return=representation" }, body: JSON.stringify({ name: name.trim(), owner_id: user.id, location: location.trim() || null, category, description: description.trim() || null }) });
         if (!createRes.ok) {
           const detail = await createRes.text().catch(() => "");
@@ -46,7 +71,7 @@ export default function MerchantOnboardingPage() {
         }
       }
       localStorage.setItem("cq_selected_plan", plan);
-      const checkoutRes = await fetch(`${URL}/functions/v1/merchant-checkout`, { method: "POST", headers, body: JSON.stringify({ plan }) });
+      const checkoutRes = await fetch(`${URL}/functions/v1/merchant-checkout-v2`, { method: "POST", headers, body: JSON.stringify({ plan }) });
       const checkout = await checkoutRes.json().catch(() => ({}));
       if (!checkoutRes.ok || !checkout.url) throw new Error(checkout.error || "Could not start secure Stripe checkout.");
       window.location.href = checkout.url;
