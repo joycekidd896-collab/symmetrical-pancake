@@ -1,247 +1,87 @@
-Joyce's Elite Coupons
+# Coupon Queen 👑
 
-Local Deals, Coupons & Merchant Marketplace
+**The Crown Jewel of Savings**
 
-Joyce's Elite Coupons is a local savings platform designed to help people discover coupons, deals, discounts, and savings from local businesses.
+Coupon Queen is a local coupon and merchant marketplace at **couponqueen.online**. Customers can discover live local offers, while merchants can create businesses, publish offers, and verify redemptions.
 
-The goal is to create a simple, mobile-friendly marketplace where customers can find valuable local offers while merchants can promote their businesses and deals.
+## Production stack
 
----
-
-🚧 Current Project Status
-
-This project is currently under active development.
-
-The current application foundation includes:
-
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
 - Next.js App Router
-- Responsive web application structure
-
-The application is being built toward a production-ready local coupon and merchant marketplace.
-
----
-
-🎯 Project Goals
-
-Joyce's Elite Coupons is intended to provide:
-
-- Local coupons
-- Local deals
-- Merchant offers
-- Discount listings
-- Customer savings
-- Merchant promotion
-- Mobile-friendly browsing
-- Search and discovery
-- Organized coupon categories
-- A foundation for future merchant and customer accounts
-
-Additional functionality will be added as development continues.
-
----
-
-📁 Project Structure
-
-The application uses the Next.js App Router.
-
-Current structure:
-
-symmetrical-pancake/
-├── app/
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── middleware.ts
-├── next.config.ts
-├── tailwind.config.ts
-└── types.ts
-
-Additional folders and features will be added as the application grows.
-
----
-
-🛠️ Technology
-
-The project is built with:
-
-- Next.js
-- React
+- React 19
 - TypeScript
 - Tailwind CSS
+- Supabase Auth, PostgreSQL, RLS, and Edge Functions
+- Vercel production deployment
 
-The application is designed to support future integrations such as databases, authentication, merchant management, coupon management, and AI-powered functionality.
+## Merchant experience
 
----
+Merchants can:
 
-💻 Development
+- Create a merchant account
+- Establish a business profile
+- Publish live offers with expiration dates
+- Manage and pause offers
+- View redemption activity and analytics
+- Verify customer redemption codes
 
-Once the project dependencies and configuration files are complete, the application can be run locally with:
+New accounts are onboarded before any optional paid checkout is started. Royal Starter trial access is available for initial testing; paid plans are handled through the merchant checkout flow after the business profile exists.
 
+## Customer experience
+
+Customers can:
+
+- Browse the Deal Vault
+- View live merchant offers
+- Open individual offer pages
+- Sign in to claim live merchant deals
+- Receive a server-generated redemption code
+- Present the code to the merchant
+
+Static/example coupons are kept separate from live merchant offers.
+
+## Security
+
+- Supabase Row Level Security protects merchant data.
+- Merchant redemption codes are generated server-side.
+- Live redemption requires an authenticated customer.
+- Expired or inactive merchant offers cannot be redeemed.
+- Service-role credentials are never exposed to the browser.
+- Secrets belong in deployment environment variables, never in Git.
+
+## Repository
+
+GitHub: `joycekidd896-collab/symmetrical-pancake`
+
+The `main` branch is connected to the existing Vercel project:
+
+`joyce_stanford_elite_coupons_production_system`
+
+No replacement Vercel project is required.
+
+## Development
+
+```bash
 npm install
 npm run dev
+```
 
-Then open the local development address provided by Next.js.
+Production build:
 
----
-
-🏗️ Production Build
-
-To create a production build:
-
+```bash
 npm run build
-
-To start the production application:
-
 npm run start
+```
 
-The production build should be tested before deployment.
+## Project principles
 
----
+1. Preserve working Coupon Queen functionality.
+2. Keep merchant and customer data protected by RLS.
+3. Never expose private credentials in client code.
+4. Validate authentication and ownership server-side.
+5. Keep live offers expiration-aware.
+6. Keep the repository organized and avoid duplicate route trees.
+7. Test production builds before release.
 
-🔐 Security
+## Domain
 
-Secrets and private credentials must never be committed to this repository.
-
-API keys, database credentials, authentication secrets, and other private configuration should be stored using environment variables.
-
-A future ".env.example" file should contain variable names and placeholders only.
-
-Example:
-
-OPENAI_API_KEY=
-
-Never place an actual API key inside source code or this README.
-
----
-
-🤖 AI Integration
-
-The project may eventually use AI-powered functionality to improve the coupon and merchant experience.
-
-Any AI API integration must:
-
-- Keep API credentials server-side
-- Never expose private API keys in browser code
-- Use environment variables for secrets
-- Validate user input
-- Handle API errors safely
-- Avoid committing credentials to GitHub
-
----
-
-🗄️ Database
-
-Database functionality may be added as the project develops.
-
-Potential functionality includes:
-
-- Coupon storage
-- Merchant profiles
-- Customer accounts
-- Deal management
-- Categories
-- Saved coupons
-- Coupon usage
-- Merchant administration
-
-Database credentials must be stored securely through environment variables.
-
----
-
-📱 Mobile First
-
-Joyce's Elite Coupons is intended to work especially well on mobile devices.
-
-The interface should prioritize:
-
-- Easy navigation
-- Readable text
-- Large touch targets
-- Fast loading
-- Simple coupon discovery
-- Responsive layouts
-- Mobile-friendly merchant listings
-
-Desktop layouts should remain fully supported.
-
----
-
-🧪 Development Principles
-
-When contributing to this project:
-
-1. Inspect the existing code before making changes.
-2. Preserve working functionality.
-3. Avoid unnecessary duplicate files.
-4. Keep TypeScript code properly typed.
-5. Keep secrets out of GitHub.
-6. Verify imports and file paths.
-7. Keep the application responsive.
-8. Test builds before production deployment.
-9. Do not introduce dependencies without a reason.
-10. Keep the project structure organized and maintainable.
-
----
-
-🚀 Future Features
-
-Planned or potential features include:
-
-Customer Features
-
-- Browse local coupons
-- Search deals
-- Filter by category
-- View coupon details
-- Save favorite coupons
-- Discover nearby offers
-- Redeem coupons
-
-Merchant Features
-
-- Merchant accounts
-- Business profiles
-- Create coupons
-- Manage offers
-- Track coupon activity
-- Promote featured deals
-
-Platform Features
-
-- Coupon categories
-- Search
-- Location-based discovery
-- Featured deals
-- Expiring deals
-- Merchant marketplace
-- Administrative tools
-- Analytics
-- Notifications
-
----
-
-❤️ About Joyce's Elite Coupons
-
-Joyce's Elite Coupons is being built to make local savings easier to discover while giving local businesses another way to reach customers.
-
-The long-term vision is to create a useful, accessible, and community-focused local savings marketplace.
-
----
-
-📌 Repository
-
-Project: Joyce's Elite Coupons
-
-Repository: "joycekidd896-collab/symmetrical-pancake"
-
-Vercel production deployment is managed from the main branch of this repository.
-
----
-
-📄 License
-
-A final open-source or commercial license will be selected before public production release.
+**couponqueen.online** is the official Coupon Queen domain.
