@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 // publishable key is safe for browser use and is protected by RLS.
 const SUPABASE_URL = "https://unpgjnlhcbtbspcehfsw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b4o1HJPZOaYsQupzz4F9YA_XLt5obuK";
+const PRODUCTION_REDIRECT = "https://couponqueen.online/businesses/login";
 
 export default function MerchantLoginPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -37,7 +38,9 @@ export default function MerchantLoginPage() {
     setError("");
     setMessage("");
     try {
-      const endpoint = mode === "signup" ? "/auth/v1/signup" : "/auth/v1/token?grant_type=password";
+      const endpoint = mode === "signup"
+        ? `/auth/v1/signup?redirect_to=${encodeURIComponent(PRODUCTION_REDIRECT)}`
+        : "/auth/v1/token?grant_type=password";
       const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
         method: "POST",
         headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
@@ -48,7 +51,7 @@ export default function MerchantLoginPage() {
 
       if (mode === "signup" && !data.access_token) {
         if (plan) localStorage.setItem("cq_selected_plan", plan);
-        setMessage("Account created! Check your email if confirmation is required, then sign in to continue.");
+        setMessage("Account created! Check your email to confirm your account, then sign in to continue.");
         setMode("login");
         return;
       }
