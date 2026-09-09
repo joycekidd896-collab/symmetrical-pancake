@@ -9,7 +9,7 @@ type Offer = { id:string; discount:string; title:string; description:string|null
 const URL=process.env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export default function BusinessProfilePage({ params }: { params: { id:string } }) {
+export default function BusinessProfilePage({ params }: { params: Promise<{ id:string }> }) {
   const [business,setBusiness]=useState<Business|null>(null);
   const [offers,setOffers]=useState<Offer[]>([]);
   const [loading,setLoading]=useState(true);
@@ -18,14 +18,15 @@ export default function BusinessProfilePage({ params }: { params: { id:string } 
   useEffect(()=>{
     const load=async()=>{
       try{
+        const { id } = await params;
         if(!URL||!KEY){setError("Business information is temporarily unavailable.");return;}
         const headers={apikey:KEY};
-        const res=await fetch(`${URL}/rest/v1/businesses?id=eq.${encodeURIComponent(params.id)}&select=id,name,location,category,description&limit=1`,{headers,cache:"no-store"});
+        const res=await fetch(`${URL}/rest/v1/businesses?id=eq.${encodeURIComponent(id)}&select=id,name,location,category,description&limit=1`,{headers,cache:"no-store"});
         if(!res.ok)throw new Error();
         const rows=await res.json();
         if(!rows[0]){setError("Business not found.");return;}
         setBusiness(rows[0]);
-        const offersRes=await fetch(`${URL}/rest/v1/business_offers?business_id=eq.${encodeURIComponent(params.id)}&active=eq.true&select=id,discount,title,description,category,location,expires,expires_at&order=created_at.desc`,{headers,cache:"no-store"});
+        const offersRes=await fetch(`${URL}/rest/v1/business_offers?business_id=eq.${encodeURIComponent(id)}&active=eq.true&select=id,discount,title,description,category,location,expires,expires_at&order=created_at.desc`,{headers,cache:"no-store"});
         if(offersRes.ok){
           const now=Date.now();
           const offerRows=await offersRes.json();
@@ -35,12 +36,11 @@ export default function BusinessProfilePage({ params }: { params: { id:string } 
       finally{setLoading(false);}
     };
     load();
-  },[params.id]);
+  },[params]);
 
   const location=business?.location?.trim()||"Local location";
   const mapsUrl=business?.location?.trim()?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.location)}`:"";
   const category=business?.category||"Local Business";
-
   const intro=useMemo(()=>business?.description?.trim()||`${business?.name||"This business"} is part of the Coupon Queen Business Kingdom. Discover current offers and save when you shop locally.`,[business]);
 
   if(loading)return <main className="queen-page"><div className="business-loading">♛ Loading business profile…</div><style jsx>{`.business-loading{min-height:70vh;display:grid;place-items:center;font-size:18px;font-weight:900;color:var(--queen-espresso)}`}</style></main>;
