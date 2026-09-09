@@ -238,6 +238,8 @@ Project: Joyce's Elite Coupons
 
 Repository: "joycekidd896-collab/symmetrical-pancake"
 
+Vercel production deployment is managed from the main branch of this repository.
+
 ---
 
 📄 License
