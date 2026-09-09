@@ -10,7 +10,7 @@ export default function LiveOffers({ onLoad }: { onLoad: (offers: Coupon[]) => v
         const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
         const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
         if (!url || !key) return;
-        const response = await fetch(`${url}/rest/v1/business_offers?active=eq.true&select=id,discount,title,description,category,location,expires,expires_at,businesses(name)&order=created_at.desc`, {
+        const response = await fetch(`${url}/rest/v1/business_offers?active=eq.true&select=id,business_id,discount,title,description,category,location,expires,expires_at,businesses(name)&order=created_at.desc`, {
           headers: { apikey: key },
           cache: "no-store",
         });
@@ -21,6 +21,7 @@ export default function LiveOffers({ onLoad }: { onLoad: (offers: Coupon[]) => v
           .filter((row: any) => !row.expires_at || new Date(row.expires_at).getTime() > now)
           .map((row: any) => ({
             id: `live-${row.id}`,
+            business_id: row.business_id,
             discount: row.discount,
             title: row.title,
             business: row.businesses?.name || "Local Business",
@@ -31,7 +32,7 @@ export default function LiveOffers({ onLoad }: { onLoad: (offers: Coupon[]) => v
             terms: ["One redemption per customer.", "Merchant terms may apply."],
           })));
       } catch {
-        // A failed live request leaves the Deal Vault in its safe empty state.
+        // Keep the Deal Vault safely empty when the live request fails.
       }
     };
     load();
