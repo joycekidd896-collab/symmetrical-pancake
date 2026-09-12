@@ -8,6 +8,5 @@ export type Coupon = {
   location: string;
   description: string;
   expires: string;
-  featured?: boolean;
   terms: string[];
 };
