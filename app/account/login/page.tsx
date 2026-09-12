@@ -15,6 +15,11 @@ export default function CustomerLoginPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  function getSafeDestination() {
+    const next = new URLSearchParams(window.location.search).get("next") || "";
+    return next.startsWith("/") && !next.startsWith("//") ? next : "/account";
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     setBusy(true); setError(""); setMessage("");
@@ -27,11 +32,12 @@ export default function CustomerLoginPage() {
       });
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.msg || data?.message || data?.error_description || "We could not complete that request.");
+      const destination = getSafeDestination();
       if (mode === "signup") {
         if (data?.access_token) {
           localStorage.setItem("cq_access_token", data.access_token);
           if (data.refresh_token) localStorage.setItem("cq_refresh_token", data.refresh_token);
-          window.location.href = "/account";
+          window.location.href = destination;
         } else {
           setMessage("Your account was created. Check your email if confirmation is required, then sign in.");
           setMode("login");
@@ -39,7 +45,7 @@ export default function CustomerLoginPage() {
       } else {
         localStorage.setItem("cq_access_token", data.access_token);
         if (data.refresh_token) localStorage.setItem("cq_refresh_token", data.refresh_token);
-        window.location.href = "/account";
+        window.location.href = destination;
       }
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
     finally { setBusy(false); }
