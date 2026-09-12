@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 type Coupon = { id:string; title:string; description:string|null; terms:string|null; discount_text:string; status:string; starts_at:string|null; expires_at:string|null; merchant_id:string; merchants?:{business_name:string}|null; categories?:{name:string}|null };
 type Save = { id:string; redemption_token:string; redeemed_at:string|null };
