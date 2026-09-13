@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SUPABASE_KEY, SUPABASE_URL } from "../../../lib/supabase-config";
 
 type Plan = {
   id: string;
@@ -12,9 +13,6 @@ type Plan = {
   stripe_price_id: string | null;
 };
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
 export default function PricingPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +21,7 @@ export default function PricingPage() {
   useEffect(() => {
     (async () => {
       try {
-        if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error("Pricing is not configured yet.");
+        if (!SUPABASE_KEY) throw new Error("Pricing is not configured yet.");
         const res = await fetch(
           `${SUPABASE_URL}/rest/v1/merchant_plans?is_active=eq.true&select=id,name,monthly_price_cents,description,features,stripe_price_id&order=monthly_price_cents.asc`,
           { headers: { apikey: SUPABASE_KEY }, cache: "no-store" },
