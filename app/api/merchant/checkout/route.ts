@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
+import { SUPABASE_KEY, SUPABASE_URL } from "../../../../lib/supabase-config";
 
 export const runtime = "nodejs";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://couponqueen.online").replace(/\/$/, "");
 
@@ -11,7 +10,7 @@ function jsonError(message: string, status = 400) { return NextResponse.json({ e
 
 export async function POST(request: Request) {
   try {
-    if (!SUPABASE_URL || !SUPABASE_KEY) return jsonError("Supabase is not configured.", 500);
+    if (!SUPABASE_KEY) return jsonError("Supabase is not configured.", 500);
     if (!STRIPE_SECRET_KEY) return jsonError("Stripe checkout is not configured yet.", 503);
     const auth = request.headers.get("authorization");
     if (!auth?.startsWith("Bearer ")) return jsonError("Merchant sign-in is required.", 401);
