@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
+import { SUPABASE_URL } from "../../../../lib/supabase-config";
 
 export const runtime = "nodejs";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -35,7 +35,7 @@ function timestamp(value: number | null | undefined) {
 }
 
 async function supabase(path: string, init: RequestInit = {}) {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase service configuration is missing.");
+  if (!SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase service configuration is missing.");
   return fetch(`${SUPABASE_URL}${path}`, {
     ...init,
     headers: {
