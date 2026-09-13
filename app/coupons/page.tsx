@@ -23,7 +23,7 @@ export default function CouponsPage() {
     return [...filtered].sort((a, b) => {
       if (sort === "business") return a.business.localeCompare(b.business);
       if (sort === "discount") return Number.parseFloat(b.discount.replace(/[^0-9.]/g, "")) - Number.parseFloat(a.discount.replace(/[^0-9.]/g, ""));
-      return 0;
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
   }, [activeCategory, query, liveOffers, sort]);
 
