@@ -9,4 +9,5 @@ export type Coupon = {
   description: string;
   expires: string;
   terms: string[];
+  created_at?: string;
 };
