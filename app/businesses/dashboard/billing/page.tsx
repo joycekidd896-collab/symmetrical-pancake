@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SUPABASE_KEY, SUPABASE_URL } from "../../../../lib/supabase-config";
 
 type Plan = {
   id: string;
@@ -10,9 +11,6 @@ type Plan = {
   description: string;
   stripe_price_id: string | null;
 };
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export default function MerchantBillingPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -29,16 +27,24 @@ export default function MerchantBillingPage() {
     (async () => {
       try {
         if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error("Merchant billing is not configured.");
-        const requested = new URLSearchParams(window.location.search).get("plan") || localStorage.getItem("cq_selected_plan") || "";
+        const requested =
+          new URLSearchParams(window.location.search).get("plan") ||
+          localStorage.getItem("cq_selected_plan") ||
+          "";
         const headers = { apikey: SUPABASE_KEY };
         const pr = await fetch(
           `${SUPABASE_URL}/rest/v1/merchant_plans?is_active=eq.true&select=id,name,monthly_price_cents,description,stripe_price_id&order=monthly_price_cents.asc`,
           { headers, cache: "no-store" },
         );
         if (!pr.ok) throw new Error("Could not load merchant plans.");
+
         const livePlans: Plan[] = await pr.json();
         setPlans(livePlans);
-        const selected = livePlans.find((p) => p.id === requested) || livePlans.find((p) => p.stripe_price_id) || livePlans[0];
+        const selected =
+          livePlans.find((p) => p.id === requested) ||
+          livePlans.find((p) => p.stripe_price_id) ||
+          livePlans[0];
+
         if (selected) {
           setPlanId(selected.id);
           localStorage.setItem("cq_selected_plan", selected.id);
@@ -46,20 +52,27 @@ export default function MerchantBillingPage() {
 
         const token = localStorage.getItem("cq_access_token");
         if (!token) return;
+
         const authHeaders = { ...headers, Authorization: `Bearer ${token}` };
-        const ur = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: authHeaders, cache: "no-store" });
+        const ur = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+          headers: authHeaders,
+          cache: "no-store",
+        });
         if (!ur.ok) return;
+
         const user = await ur.json();
         const mr = await fetch(
           `${SUPABASE_URL}/rest/v1/merchants?owner_user_id=eq.${encodeURIComponent(user.id)}&select=id,business_name,city,state,description&limit=1`,
           { headers: authHeaders, cache: "no-store" },
         );
         if (!mr.ok) throw new Error("Could not check your merchant profile.");
+
         const rows = await mr.json();
         if (!rows[0]) {
           window.location.href = `/businesses/onboarding?plan=${encodeURIComponent(selected?.id || requested)}`;
           return;
         }
+
         const merchant = rows[0];
         setName(merchant.business_name || "");
         setCity(merchant.city || "");
@@ -79,15 +92,18 @@ export default function MerchantBillingPage() {
     e.preventDefault();
     setError("");
     setSaving(true);
+
     try {
       if (!chosenPlan) throw new Error("Please choose a merchant plan.");
       if (!chosenPlan.stripe_price_id) throw new Error("This plan is not connected to Stripe yet.");
+
       const token = localStorage.getItem("cq_access_token");
       if (!token) {
         localStorage.setItem("cq_selected_plan", planId);
         window.location.href = `/businesses/login?mode=login&next=/businesses/dashboard/billing?plan=${encodeURIComponent(planId)}`;
         return;
       }
+
       const res = await fetch("/api/merchant/checkout", {
         method: "POST",
         headers: {
@@ -102,8 +118,12 @@ export default function MerchantBillingPage() {
           description: description.trim(),
         }),
       });
+
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.url) throw new Error(data.error || "Could not start secure Stripe checkout.");
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || "Could not start secure Stripe checkout.");
+      }
+
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not continue to checkout.");
@@ -130,7 +150,9 @@ export default function MerchantBillingPage() {
       <section className="billing-shell">
         <div className="section-kicker">♛ SECURE MERCHANT BILLING</div>
         <h1>Choose Your Membership</h1>
-        <p className="intro">Your plan, business profile, and Stripe checkout stay connected to the production merchant account.</p>
+        <p className="intro">
+          Your plan, business profile, and Stripe checkout stay connected to the production merchant account.
+        </p>
         {error && <div className="error" role="alert">✕ {error}</div>}
         {loading ? (
           <div className="billing-card loading">Opening merchant billing…</div>
@@ -138,7 +160,13 @@ export default function MerchantBillingPage() {
           <form onSubmit={continueToCheckout} className="billing-card">
             <label>
               Membership plan
-              <select value={planId} onChange={(e) => { setPlanId(e.target.value); localStorage.setItem("cq_selected_plan", e.target.value); }}>
+              <select
+                value={planId}
+                onChange={(e) => {
+                  setPlanId(e.target.value);
+                  localStorage.setItem("cq_selected_plan", e.target.value);
+                }}
+              >
                 {plans.map((p) => (
                   <option key={p.id} value={p.id} disabled={!p.stripe_price_id}>
                     {p.name} · ${(p.monthly_price_cents / 100).toFixed(0)}/month{p.stripe_price_id ? "" : " · Stripe pending"}
