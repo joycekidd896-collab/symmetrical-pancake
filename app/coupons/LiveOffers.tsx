@@ -2,19 +2,18 @@
 
 import { useEffect } from "react";
 import type { Coupon } from "../../lib/coupons";
+import { SUPABASE_KEY, SUPABASE_URL } from "../../lib/supabase-config";
 
 export default function LiveOffers({ onLoad }: { onLoad: (offers: Coupon[]) => void }) {
   useEffect(() => {
     const load = async () => {
       try {
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-        if (!url || !key) return;
+        if (!SUPABASE_KEY) return;
 
         const response = await fetch(
-          `${url}/rest/v1/coupons?status=eq.active&select=id,merchant_id,category_id,title,description,terms,discount_text,starts_at,expires_at,merchants(business_name,city,state),categories(name)&order=created_at.desc`,
+          `${SUPABASE_URL}/rest/v1/coupons?status=eq.active&select=id,merchant_id,category_id,title,description,terms,discount_text,starts_at,expires_at,merchants(business_name,city,state),categories(name)&order=created_at.desc`,
           {
-            headers: { apikey: key },
+            headers: { apikey: SUPABASE_KEY },
             cache: "no-store",
           },
         );
