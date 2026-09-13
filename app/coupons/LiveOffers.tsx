@@ -11,7 +11,7 @@ export default function LiveOffers({ onLoad }: { onLoad: (offers: Coupon[]) => v
         if (!SUPABASE_KEY) return;
 
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/coupons?status=eq.active&select=id,merchant_id,category_id,title,description,terms,discount_text,starts_at,expires_at,merchants(business_name,city,state),categories(name)&order=created_at.desc`,
+          `${SUPABASE_URL}/rest/v1/coupons?status=eq.active&select=id,merchant_id,category_id,title,description,terms,discount_text,starts_at,expires_at,created_at,merchants(business_name,city,state),categories(name)&order=created_at.desc`,
           {
             headers: { apikey: SUPABASE_KEY },
             cache: "no-store",
@@ -51,6 +51,7 @@ export default function LiveOffers({ onLoad }: { onLoad: (offers: Coupon[]) => v
                   ? `Ends ${new Date(row.expires_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`
                   : "Active offer",
                 terms: terms.length ? terms : ["One redemption per customer.", "Merchant terms may apply."],
+                created_at: row.created_at,
               } satisfies Coupon;
             }),
         );
