@@ -47,68 +47,101 @@ async function supabase(path: string, init: RequestInit = {}) {
   });
 }
 
+async function getStripeSubscription(subscriptionId: string) {
+  if (!STRIPE_SECRET_KEY) throw new Error("Stripe secret is not configured.");
+  const response = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+    headers: { Authorization: `Bearer ${STRIPE_SECRET_KEY}` },
+    cache: "no-store",
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data?.id) throw new Error(data?.error?.message || "Could not retrieve the Stripe subscription.");
+  return data;
+}
+
+async function syncSubscription(subscription: any, fallbackMetadata: Record<string, string> = {}) {
+  if (!subscription?.id) return NextResponse.json({ received: true });
+
+  let metadata = { ...(fallbackMetadata || {}), ...(subscription.metadata || {}) };
+  if (!metadata.user_id || !metadata.merchant_id || !metadata.plan_id) {
+    const lookup = await supabase(`/rest/v1/subscriptions?stripe_subscription_id=eq.${encodeURIComponent(subscription.id)}&select=user_id,merchant_id,merchant_plan_id&limit=1`);
+    if (lookup.ok) {
+      const rows = await lookup.json();
+      const existing = rows[0];
+      if (existing) {
+        metadata = {
+          ...metadata,
+          user_id: metadata.user_id || existing.user_id,
+          merchant_id: metadata.merchant_id || existing.merchant_id,
+          plan_id: metadata.plan_id || existing.merchant_plan_id,
+        };
+      }
+    }
+  }
+
+  if (!metadata.user_id || !metadata.merchant_id || !metadata.plan_id) {
+    console.error("Stripe subscription missing Coupon Queen metadata", subscription.id);
+    return jsonError("Subscription metadata is incomplete.", 400);
+  }
+
+  const priceId = subscription.items?.data?.[0]?.price?.id || null;
+  const row = {
+    user_id: metadata.user_id,
+    merchant_id: metadata.merchant_id,
+    merchant_plan_id: metadata.plan_id,
+    subscription_type: "merchant",
+    stripe_customer_id: typeof subscription.customer === "string" ? subscription.customer : null,
+    stripe_subscription_id: subscription.id,
+    stripe_price_id: priceId,
+    status: subscription.status,
+    current_period_start: timestamp(subscription.current_period_start),
+    current_period_end: timestamp(subscription.current_period_end),
+    cancel_at_period_end: Boolean(subscription.cancel_at_period_end),
+    updated_at: new Date().toISOString(),
+  };
+
+  const save = await supabase("/rest/v1/subscriptions?on_conflict=stripe_subscription_id", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify(row),
+  });
+  if (!save.ok) {
+    const detail = await save.text().catch(() => "");
+    console.error("Could not save Stripe subscription", detail);
+    return jsonError("Could not sync the merchant subscription.", 500);
+  }
+
+  console.log("Coupon Queen Stripe subscription synced", subscription.id, metadata.merchant_id);
+  return NextResponse.json({ received: true });
+}
+
 export async function POST(request: Request) {
   try {
-    if (!STRIPE_SECRET_KEY || !STRIPE_WEBHOOK_SECRET) return jsonError("Stripe webhook is not configured.", 503);
+    if (!STRIPE_WEBHOOK_SECRET || !SUPABASE_SERVICE_ROLE_KEY) {
+      return jsonError("Stripe webhook is not configured.", 503);
+    }
+
     const signature = request.headers.get("stripe-signature");
     const payload = await request.text();
     if (!signature || !verifyStripeSignature(payload, signature)) return jsonError("Invalid Stripe signature.", 400);
 
     const event = JSON.parse(payload);
-    if (!["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) {
-      return NextResponse.json({ received: true });
+
+    if (["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) {
+      return syncSubscription(event.data?.object);
     }
 
-    const subscription = event.data?.object;
-    if (!subscription?.id) return NextResponse.json({ received: true });
+    if (event.type === "checkout.session.completed") {
+      const session = event.data?.object;
+      const subscriptionId = typeof session?.subscription === "string" ? session.subscription : null;
+      if (!subscriptionId) return NextResponse.json({ received: true });
 
-    let metadata = subscription.metadata || {};
-    if (!metadata.user_id || !metadata.merchant_id || !metadata.plan_id) {
-      const lookup = await supabase(`/rest/v1/subscriptions?stripe_subscription_id=eq.${encodeURIComponent(subscription.id)}&select=user_id,merchant_id,merchant_plan_id&limit=1`);
-      if (lookup.ok) {
-        const rows = await lookup.json();
-        const existing = rows[0];
-        if (existing) {
-          metadata = {
-            ...metadata,
-            user_id: metadata.user_id || existing.user_id,
-            merchant_id: metadata.merchant_id || existing.merchant_id,
-            plan_id: metadata.plan_id || existing.merchant_plan_id,
-          };
-        }
-      }
-    }
-
-    if (!metadata.user_id || !metadata.merchant_id || !metadata.plan_id) {
-      console.error("Stripe subscription missing Coupon Queen metadata", subscription.id);
-      return jsonError("Subscription metadata is incomplete.", 400);
-    }
-
-    const priceId = subscription.items?.data?.[0]?.price?.id || null;
-    const row = {
-      user_id: metadata.user_id,
-      merchant_id: metadata.merchant_id,
-      merchant_plan_id: metadata.plan_id,
-      subscription_type: "merchant",
-      stripe_customer_id: typeof subscription.customer === "string" ? subscription.customer : null,
-      stripe_subscription_id: subscription.id,
-      stripe_price_id: priceId,
-      status: subscription.status,
-      current_period_start: timestamp(subscription.current_period_start),
-      current_period_end: timestamp(subscription.current_period_end),
-      cancel_at_period_end: Boolean(subscription.cancel_at_period_end),
-      updated_at: new Date().toISOString(),
-    };
-
-    const save = await supabase("/rest/v1/subscriptions?on_conflict=stripe_subscription_id", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" },
-      body: JSON.stringify(row),
-    });
-    if (!save.ok) {
-      const detail = await save.text().catch(() => "");
-      console.error("Could not save Stripe subscription", detail);
-      return jsonError("Could not sync the merchant subscription.", 500);
+      const fallbackMetadata = {
+        user_id: session?.metadata?.user_id || "",
+        merchant_id: session?.metadata?.merchant_id || "",
+        plan_id: session?.metadata?.plan_id || "",
+      };
+      const subscription = await getStripeSubscription(subscriptionId);
+      return syncSubscription(subscription, fallbackMetadata);
     }
 
     return NextResponse.json({ received: true });
