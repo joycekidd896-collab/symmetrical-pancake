@@ -4,13 +4,13 @@ export default function HomePage() {
   return (
     <main className="queen-page">
       <header className="site-header">
-        <div className="brand-wrap">
+        <Link href="/" className="brand-wrap" aria-label="Coupon Queen home">
           <div className="brand-crown">♕</div>
           <div>
             <div className="brand-name">COUPON QUEEN</div>
             <div className="brand-tagline">The Crown Jewel of Savings</div>
           </div>
-        </div>
+        </Link>
 
         <nav aria-label="Main navigation">
           <Link href="/coupons">Coupons</Link>
@@ -23,30 +23,17 @@ export default function HomePage() {
       </header>
 
       <section className="hero-section">
-        <div className="hero-diamond diamond-one" aria-hidden="true">
-          ◆
-        </div>
-        <div className="hero-diamond diamond-two" aria-hidden="true">
-          ✦
-        </div>
-        <div className="hero-sparkle sparkle-one" aria-hidden="true">
-          ✧
-        </div>
-        <div className="hero-sparkle sparkle-two" aria-hidden="true">
-          ✦
-        </div>
+        <div className="hero-diamond diamond-one" aria-hidden="true">◆</div>
+        <div className="hero-diamond diamond-two" aria-hidden="true">✦</div>
+        <div className="hero-sparkle sparkle-one" aria-hidden="true">✧</div>
+        <div className="hero-sparkle sparkle-two" aria-hidden="true">✦</div>
 
         <div className="hero-content">
           <div className="royal-badge">
-            <span>♛</span>
-            <span>YOUR SAVINGS ROYALTY</span>
-            <span>♛</span>
+            <span>♛</span><span>YOUR SAVINGS ROYALTY</span><span>♛</span>
           </div>
 
-          <h1>
-            Find Deals Worth
-            <span> Crowning</span>
-          </h1>
+          <h1>Find Deals Worth<span> Crowning</span></h1>
 
           <p className="hero-description">
             Discover beautiful savings, local deals, and money-saving coupons
@@ -55,14 +42,10 @@ export default function HomePage() {
 
           <div className="hero-actions">
             <Link href="/coupons" className="queen-button primary-button">
-              <span>🎟️</span>
-              Browse Coupons
-              <span className="button-arrow">→</span>
+              <span>🎟️</span>Browse Coupons<span className="button-arrow">→</span>
             </Link>
-
             <Link href="/businesses" className="queen-button secondary-button">
-              For Local Businesses
-              <span className="button-arrow">→</span>
+              For Local Businesses<span className="button-arrow">→</span>
             </Link>
           </div>
 
@@ -77,9 +60,7 @@ export default function HomePage() {
           <div className="card-label">FEATURED SAVINGS</div>
           <div className="card-diamond">◇</div>
           <div className="card-title">Your Next Great Deal</div>
-          <div className="card-copy">
-            Save more. Shop smarter.
-          </div>
+          <div className="card-copy">Save more. Shop smarter.</div>
           <div className="coupon-ribbon">COUPON</div>
         </div>
       </section>
@@ -88,74 +69,39 @@ export default function HomePage() {
         <div className="section-heading">
           <div className="section-kicker">THE QUEEN'S COLLECTION</div>
           <h2>Everything You Need to Save in Style</h2>
-          <p>
-            Your favorite deals, local savings, and business offers —
-            beautifully brought together.
-          </p>
+          <p>Your favorite deals, local savings, and business offers — beautifully brought together.</p>
         </div>
 
         <div className="benefit-grid">
           <article className="benefit-card">
-            <div className="card-icon turquoise-icon">💎</div>
-            <div className="card-number">01</div>
+            <div className="card-icon turquoise-icon">💎</div><div className="card-number">01</div>
             <h3>Local Deals</h3>
-            <p>
-              Discover valuable offers from businesses right in your
-              community.
-            </p>
-            <Link href="/coupons" className="card-link">
-              Explore deals <span>→</span>
-            </Link>
+            <p>Discover valuable offers from businesses right in your community.</p>
+            <Link href="/coupons" className="card-link">Explore deals <span>→</span></Link>
           </article>
-
           <article className="benefit-card featured-card">
-            <div className="card-icon gold-icon">🎟️</div>
-            <div className="card-number">02</div>
+            <div className="card-icon gold-icon">🎟️</div><div className="card-number">02</div>
             <h3>Easy Savings</h3>
-            <p>
-              Find coupons and special offers without the hassle of hunting
-              everywhere.
-            </p>
-            <Link href="/coupons" className="card-link">
-              Start saving <span>→</span>
-            </Link>
+            <p>Find coupons and special offers without the hassle of hunting everywhere.</p>
+            <Link href="/coupons" className="card-link">Start saving <span>→</span></Link>
           </article>
-
           <article className="benefit-card">
-            <div className="card-icon espresso-icon">👑</div>
-            <div className="card-number">03</div>
+            <div className="card-icon espresso-icon">👑</div><div className="card-number">03</div>
             <h3>Local Businesses</h3>
-            <p>
-              Help great local businesses reach customers with offers worth
-              sharing.
-            </p>
-            <Link href="/businesses" className="card-link">
-              Join the kingdom <span>→</span>
-            </Link>
+            <p>Help great local businesses reach customers with offers worth sharing.</p>
+            <Link href="/businesses" className="card-link">Join the kingdom <span>→</span></Link>
           </article>
         </div>
       </section>
 
       <section className="royal-banner">
-        <div className="banner-diamond" aria-hidden="true">
-          ◆
-        </div>
-
-        <div>
-          <div className="banner-kicker">YOUR SAVINGS. YOUR KINGDOM.</div>
-          <h2>Every Great Deal Deserves a Crown.</h2>
-        </div>
-
-        <div className="banner-crown" aria-hidden="true">
-          ♕
-        </div>
+        <div className="banner-diamond" aria-hidden="true">◆</div>
+        <div><div className="banner-kicker">YOUR SAVINGS. YOUR KINGDOM.</div><h2>Every Great Deal Deserves a Crown.</h2></div>
+        <div className="banner-crown" aria-hidden="true">♕</div>
       </section>
 
       <footer className="site-footer">
-        <div className="footer-brand">
-          <span>♕</span>
-          COUPON QUEEN
-        </div>
+        <Link href="/" className="footer-brand" aria-label="Coupon Queen home"><span>♕</span>COUPON QUEEN</Link>
         <div className="footer-tagline">The Crown Jewel of Savings</div>
         <div className="footer-sparkles">✦ ✧ ✦</div>
       </footer>
