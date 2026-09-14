@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { SUPABASE_KEY, SUPABASE_URL } from "../../../../lib/supabase-config";
+import { SUPABASE_KEY, SUPABASE_URL } from "../../../lib/supabase-config";
 
 export default function MerchantResetPasswordPage() {
   const [token, setToken] = useState(""); const [password, setPassword] = useState(""); const [confirm, setConfirm] = useState("");
