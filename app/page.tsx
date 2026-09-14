@@ -15,6 +15,7 @@ export default function HomePage() {
         <nav aria-label="Main navigation">
           <Link href="/coupons">Coupons</Link>
           <Link href="/businesses">Businesses</Link>
+          <Link href="/account/login">Sign In</Link>
         </nav>
 
         <div className="header-sparkle" aria-hidden="true">
