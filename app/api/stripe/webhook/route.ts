@@ -47,6 +47,32 @@ async function supabase(path: string, init: RequestInit = {}) {
   });
 }
 
+async function claimWebhookEvent(eventId: string, eventType: string) {
+  const save = await supabase("/rest/v1/stripe_webhook_events?on_conflict=stripe_event_id", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Prefer: "resolution=ignore-duplicates,return=representation",
+    },
+    body: JSON.stringify({ stripe_event_id: eventId, event_type: eventType, status: "processing" }),
+  });
+  if (!save.ok) {
+    const detail = await save.text().catch(() => "");
+    throw new Error(`Could not record Stripe webhook event. ${detail}`);
+  }
+  const rows = await save.json().catch(() => []);
+  return Array.isArray(rows) && rows.length > 0;
+}
+
+async function finishWebhookEvent(eventId: string, status: "processed" | "failed", errorMessage?: string) {
+  const response = await supabase(`/rest/v1/stripe_webhook_events?stripe_event_id=eq.${encodeURIComponent(eventId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
+    body: JSON.stringify({ status, processed_at: new Date().toISOString(), error_message: errorMessage || null }),
+  });
+  if (!response.ok) console.error("Could not finalize Stripe webhook event", await response.text().catch(() => ""));
+}
+
 async function getStripeSubscription(subscriptionId: string) {
   if (!STRIPE_SECRET_KEY) throw new Error("Stripe secret is not configured.");
   const response = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(subscriptionId)}`, {
@@ -115,6 +141,8 @@ async function syncSubscription(subscription: any, fallbackMetadata: Record<stri
 }
 
 export async function POST(request: Request) {
+  let eventId = "";
+
   try {
     if (!STRIPE_WEBHOOK_SECRET || !SUPABASE_SERVICE_ROLE_KEY) {
       return jsonError("Stripe webhook is not configured.", 503);
@@ -125,26 +153,46 @@ export async function POST(request: Request) {
     if (!signature || !verifyStripeSignature(payload, signature)) return jsonError("Invalid Stripe signature.", 400);
 
     const event = JSON.parse(payload);
+    eventId = typeof event?.id === "string" ? event.id : "";
+    if (!eventId) return jsonError("Stripe event id is missing.", 400);
 
-    if (["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) {
-      return syncSubscription(event.data?.object);
+    const claimed = await claimWebhookEvent(eventId, event.type || "unknown");
+    if (!claimed) return NextResponse.json({ received: true, duplicate: true });
+
+    try {
+      let response: NextResponse;
+
+      if (["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) {
+        response = await syncSubscription(event.data?.object) as NextResponse;
+      } else if (event.type === "checkout.session.completed") {
+        const session = event.data?.object;
+        const subscriptionId = typeof session?.subscription === "string" ? session.subscription : null;
+        if (!subscriptionId) {
+          await finishWebhookEvent(eventId, "processed");
+          return NextResponse.json({ received: true });
+        }
+
+        const fallbackMetadata = {
+          user_id: session?.metadata?.user_id || "",
+          merchant_id: session?.metadata?.merchant_id || "",
+          plan_id: session?.metadata?.plan_id || "",
+        };
+        const subscription = await getStripeSubscription(subscriptionId);
+        response = await syncSubscription(subscription, fallbackMetadata) as NextResponse;
+      } else {
+        response = NextResponse.json({ received: true });
+      }
+
+      if (response.status >= 400) {
+        await finishWebhookEvent(eventId, "failed", `Webhook handler returned HTTP ${response.status}.`);
+      } else {
+        await finishWebhookEvent(eventId, "processed");
+      }
+      return response;
+    } catch (error) {
+      await finishWebhookEvent(eventId, "failed", error instanceof Error ? error.message : "Webhook processing failed.");
+      throw error;
     }
-
-    if (event.type === "checkout.session.completed") {
-      const session = event.data?.object;
-      const subscriptionId = typeof session?.subscription === "string" ? session.subscription : null;
-      if (!subscriptionId) return NextResponse.json({ received: true });
-
-      const fallbackMetadata = {
-        user_id: session?.metadata?.user_id || "",
-        merchant_id: session?.metadata?.merchant_id || "",
-        plan_id: session?.metadata?.plan_id || "",
-      };
-      const subscription = await getStripeSubscription(subscriptionId);
-      return syncSubscription(subscription, fallbackMetadata);
-    }
-
-    return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Stripe webhook error", error);
     return jsonError("Webhook processing failed.", 500);
