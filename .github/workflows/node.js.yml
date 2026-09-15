@@ -22,5 +22,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: TypeScript check
+        run: npm run lint
+
       - name: Build Next.js application
         run: npm run build
