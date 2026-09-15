@@ -21,6 +21,8 @@ export default function MerchantBillingPage() {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [stripeConfigured, setStripeConfigured] = useState<boolean | null>(null);
+  const [stripeMessage, setStripeMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -48,6 +50,16 @@ export default function MerchantBillingPage() {
         if (selected) {
           setPlanId(selected.id);
           localStorage.setItem("cq_selected_plan", selected.id);
+        }
+
+        const stripeStatus = await fetch("/api/merchant/stripe-status", { cache: "no-store" }).catch(() => null);
+        if (stripeStatus) {
+          const statusData = await stripeStatus.json().catch(() => ({}));
+          setStripeConfigured(statusData.configured === true);
+          setStripeMessage(typeof statusData.message === "string" ? statusData.message : "");
+        } else {
+          setStripeConfigured(false);
+          setStripeMessage("Could not verify the production Stripe connection.");
         }
 
         const token = localStorage.getItem("cq_access_token");
@@ -87,6 +99,7 @@ export default function MerchantBillingPage() {
   }, []);
 
   const chosenPlan = plans.find((p) => p.id === planId);
+  const allSelectedPlanDataReady = Boolean(chosenPlan?.stripe_price_id && stripeConfigured);
 
   const continueToCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +109,7 @@ export default function MerchantBillingPage() {
     try {
       if (!chosenPlan) throw new Error("Please choose a merchant plan.");
       if (!chosenPlan.stripe_price_id) throw new Error("This plan is not connected to Stripe yet.");
+      if (!stripeConfigured) throw new Error("Production Stripe checkout is not connected yet. The site owner must add the production Stripe secret in Vercel.");
 
       const token = localStorage.getItem("cq_access_token");
       if (!token) {
@@ -153,6 +167,18 @@ export default function MerchantBillingPage() {
         <p className="intro">
           Your plan, business profile, and Stripe checkout stay connected to the production merchant account.
         </p>
+        {stripeConfigured === false && !loading && (
+          <div className="setup-status" role="status">
+            <strong>Stripe activation is the final billing step.</strong>
+            <span>{stripeMessage || "Production Stripe has not been connected yet."}</span>
+          </div>
+        )}
+        {stripeConfigured === true && !loading && (
+          <div className="ready-status" role="status">
+            <strong>✓ Stripe production connection verified.</strong>
+            <span>Merchant plan pricing is ready for secure subscription checkout.</span>
+          </div>
+        )}
         {error && <div className="error" role="alert">✕ {error}</div>}
         {loading ? (
           <div className="billing-card loading">Opening merchant billing…</div>
@@ -187,8 +213,8 @@ export default function MerchantBillingPage() {
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Tell customers what your business offers." rows={5} />
             </label>
             {chosenPlan && <div className="plan-pill">♛ {chosenPlan.name} · ${(chosenPlan.monthly_price_cents / 100).toFixed(0)}/month</div>}
-            <button className="queen-button primary-button" disabled={saving || !chosenPlan?.stripe_price_id} type="submit">
-              {saving ? "Opening Secure Checkout…" : "Continue to Stripe Checkout →"}
+            <button className="queen-button primary-button" disabled={saving || !allSelectedPlanDataReady} type="submit">
+              {saving ? "Opening Secure Checkout…" : !stripeConfigured ? "Stripe Activation Required" : "Continue to Stripe Checkout →"}
             </button>
             <Link href="/businesses/pricing" className="back">← Compare plans</Link>
           </form>
@@ -214,6 +240,10 @@ export default function MerchantBillingPage() {
         .primary-button:disabled{opacity:.55;cursor:not-allowed}
         .back{text-align:center;color:var(--queen-muted);font-weight:850}
         .error{margin-bottom:18px;padding:14px;border-radius:14px;background:#fff0f0;color:#9b2c2c;font-weight:800}
+        .setup-status,.ready-status{display:grid;gap:5px;margin:0 0 18px;padding:16px 18px;border-radius:16px;font-size:12px;line-height:1.5}
+        .setup-status{background:#fff8e6;border:1px solid #edd79d;color:var(--queen-espresso)}
+        .ready-status{background:#effcfb;border:1px solid #b8e7df;color:var(--queen-turquoise-dark)}
+        .setup-status span,.ready-status span{font-weight:650;opacity:.85}
         @media(max-width:620px){.two{grid-template-columns:1fr}}
       `}</style>
     </main>
