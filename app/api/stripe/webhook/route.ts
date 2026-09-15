@@ -71,11 +71,15 @@ async function claimWebhookEvent(eventId: string, eventType: string) {
   if (!existing) return false;
   if (existing.status === "processed") return false;
 
-  if (existing.status === "failed") {
-    const reclaim = await supabase(`/rest/v1/stripe_webhook_events?stripe_event_id=eq.${encodeURIComponent(eventId)}&status=eq.failed`, {
+  const receivedAt = existing.received_at ? new Date(existing.received_at).getTime() : 0;
+  const staleProcessing = existing.status === "processing" && Number.isFinite(receivedAt) && receivedAt > 0 && Date.now() - receivedAt > 10 * 60 * 1000;
+
+  if (existing.status === "failed" || staleProcessing) {
+    const reclaimFilter = staleProcessing ? "status=eq.processing&received_at=lt." + encodeURIComponent(new Date(Date.now() - 10 * 60 * 1000).toISOString()) : "status=eq.failed";
+    const reclaim = await supabase(`/rest/v1/stripe_webhook_events?stripe_event_id=eq.${encodeURIComponent(eventId)}&${reclaimFilter}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
-      body: JSON.stringify({ status: "processing", processed_at: null, error_message: null }),
+      body: JSON.stringify({ status: "processing", processed_at: null, error_message: null, received_at: new Date().toISOString() }),
     });
     return reclaim.ok;
   }
