@@ -15,7 +15,6 @@ export default function MerchantDashboardLayout({ children }: Readonly<{ childre
           <Link href="/businesses/dashboard" className="quick-brand">♕ Merchant Hub</Link>
           <nav className="quick-links" aria-label="Merchant navigation">
             <Link href="/businesses/dashboard/getting-started">Getting Started</Link>
-            <Link href="/businesses/dashboard/profile">Public Profile</Link>
             <Link href="/businesses/dashboard/notifications">Notifications</Link>
             <Link href="/businesses/dashboard/billing">Billing</Link>
           </nav>
