@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     params.set("mode", "subscription");
     params.set("line_items[0][price]", plan.stripe_price_id);
     params.set("line_items[0][quantity]", "1");
-    params.set("success_url", `${SITE_URL}/businesses/dashboard?checkout=success`);
+    params.set("success_url", `${SITE_URL}/businesses/dashboard/welcome?checkout=success`);
     params.set("cancel_url", `${SITE_URL}/businesses/pricing?checkout=cancelled`);
     params.set("customer_email", user.email);
     params.set("client_reference_id", merchant.id);
