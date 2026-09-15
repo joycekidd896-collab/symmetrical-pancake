@@ -49,6 +49,30 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default function MerchantProfileLayout({ children }: { children: React.ReactNode }) {
-  return children;
+export default async function MerchantProfileLayout({ children, params }: { children: React.ReactNode; params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const merchant = await getMerchant(id);
+  const schema = merchant
+    ? {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        name: merchant.business_name,
+        url: `${siteUrl}/businesses/${merchant.id}`,
+        description: merchant.description || undefined,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: merchant.city || undefined,
+          addressRegion: merchant.state || undefined,
+          addressCountry: "US",
+        },
+        isPartOf: { "@type": "WebSite", name: "Coupon Queen", url: siteUrl },
+      }
+    : null;
+
+  return (
+    <>
+      {schema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} /> : null}
+      {children}
+    </>
+  );
 }
