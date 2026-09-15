@@ -8,5 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: ["/account", "/businesses/dashboard", "/admin", "/api"],
     },
     sitemap: "https://couponqueen.online/sitemap.xml",
+    host: "https://couponqueen.online",
   };
 }
