@@ -48,7 +48,7 @@ async function supabase(path: string, init: RequestInit = {}) {
 }
 
 async function claimWebhookEvent(eventId: string, eventType: string) {
-  const save = await supabase("/rest/v1/stripe_webhook_events?on_conflict=stripe_event_id", {
+  const insert = await supabase("/rest/v1/stripe_webhook_events?on_conflict=stripe_event_id", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -56,12 +56,31 @@ async function claimWebhookEvent(eventId: string, eventType: string) {
     },
     body: JSON.stringify({ stripe_event_id: eventId, event_type: eventType, status: "processing" }),
   });
-  if (!save.ok) {
-    const detail = await save.text().catch(() => "");
+  if (!insert.ok) {
+    const detail = await insert.text().catch(() => "");
     throw new Error(`Could not record Stripe webhook event. ${detail}`);
   }
-  const rows = await save.json().catch(() => []);
-  return Array.isArray(rows) && rows.length > 0;
+
+  const insertedRows = await insert.json().catch(() => []);
+  if (Array.isArray(insertedRows) && insertedRows.length > 0) return true;
+
+  const existingResponse = await supabase(`/rest/v1/stripe_webhook_events?stripe_event_id=eq.${encodeURIComponent(eventId)}&select=status,received_at&limit=1`);
+  if (!existingResponse.ok) return false;
+  const existingRows = await existingResponse.json().catch(() => []);
+  const existing = existingRows[0];
+  if (!existing) return false;
+  if (existing.status === "processed") return false;
+
+  if (existing.status === "failed") {
+    const reclaim = await supabase(`/rest/v1/stripe_webhook_events?stripe_event_id=eq.${encodeURIComponent(eventId)}&status=eq.failed`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify({ status: "processing", processed_at: null, error_message: null }),
+    });
+    return reclaim.ok;
+  }
+
+  return false;
 }
 
 async function finishWebhookEvent(eventId: string, status: "processed" | "failed", errorMessage?: string) {
