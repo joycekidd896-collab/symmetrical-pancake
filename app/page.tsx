@@ -150,20 +150,6 @@ export default function HomePage() {
         <div className="footer-tagline">The Crown Jewel of Savings</div>
         <div className="footer-sparkles">✦ ✧ ✦</div>
       </footer>
-
-      <style jsx>{`
-        .home-growth-section { background: linear-gradient(180deg, #fffaf4, #ffffff); }
-        .compact-home-card { min-height: 285px; }
-        .home-merchant-banner { margin-top: 0; margin-bottom: 75px; }
-        .banner-support-copy { max-width: 620px; margin: 10px 0 0; color: rgba(255,255,255,.7); line-height: 1.7; }
-        .home-trust-section { padding-top: 80px; }
-        .home-trust-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-        .home-trust-item { padding: 22px; border: 1px solid var(--queen-border); border-radius: 20px; background: #fff; box-shadow: 0 12px 30px rgba(53,32,24,.06); }
-        .home-trust-item strong { display: block; color: var(--queen-espresso); font-size: 14px; font-weight: 900; }
-        .home-trust-item span { display: block; margin-top: 8px; color: var(--queen-muted); font-size: 13px; line-height: 1.6; }
-        @media (max-width: 900px) { .home-trust-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 620px) { .home-trust-grid { grid-template-columns: 1fr; } .home-merchant-banner { margin-bottom: 50px; } .banner-support-copy { font-size: 13px; } }
-      `}</style>
     </main>
   );
 }
