@@ -2,7 +2,7 @@
 
 **The Crown Jewel of Savings**
 
-Coupon Queen is a local coupon and merchant marketplace at **couponqueen.online**. Customers can discover live local offers, while merchants can create businesses, publish offers, and verify redemptions.
+Coupon Queen is a nationwide coupon and merchant marketplace at **couponqueen.online**. Customers can discover live offers from participating businesses across the country, while merchants can create business profiles, publish offers, and verify redemptions.
 
 ## Production stack
 
@@ -11,7 +11,7 @@ Coupon Queen is a local coupon and merchant marketplace at **couponqueen.online*
 - TypeScript
 - Tailwind CSS
 - Supabase Auth, PostgreSQL, RLS, and Edge Functions
-- Vercel production deployment
+- Vercel deployment
 
 ## Merchant experience
 
@@ -24,7 +24,7 @@ Merchants can:
 - View redemption activity and analytics
 - Verify customer redemption codes
 
-New accounts are onboarded before any optional paid checkout is started. Royal Starter trial access is available for initial testing; paid plans are handled through the merchant checkout flow after the business profile exists.
+Merchant subscription plans are handled through the Stripe checkout flow after the business profile exists.
 
 ## Customer experience
 
@@ -41,10 +41,12 @@ Static/example coupons are kept separate from live merchant offers.
 
 ## Security
 
-- Supabase Row Level Security protects merchant data.
+- Supabase Row Level Security protects merchant and customer data.
 - Merchant redemption codes are generated server-side.
 - Live redemption requires an authenticated customer.
 - Expired or inactive merchant offers cannot be redeemed.
+- Anonymous access to privileged RPC functions is revoked.
+- Stripe webhook event storage is locked away from browser roles.
 - Service-role credentials are never exposed to the browser.
 - Secrets belong in deployment environment variables, never in Git.
 
@@ -52,11 +54,7 @@ Static/example coupons are kept separate from live merchant offers.
 
 GitHub: `joycekidd896-collab/symmetrical-pancake`
 
-The `main` branch is connected to the existing Vercel project:
-
-`joyce_stanford_elite_coupons_production_system`
-
-No replacement Vercel project is required.
+The `main` branch is connected to the existing Coupon Queen Vercel integration. No replacement project is required.
 
 ## Development
 
@@ -81,6 +79,7 @@ npm run start
 5. Keep live offers expiration-aware.
 6. Keep the repository organized and avoid duplicate route trees.
 7. Test production builds before release.
+8. Keep public merchant and offer pages discoverable while private dashboards remain noindex.
 
 ## Domain
 
