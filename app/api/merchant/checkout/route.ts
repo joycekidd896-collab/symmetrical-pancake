@@ -67,9 +67,11 @@ export async function POST(request: Request) {
     params.set("metadata[user_id]", user.id);
     params.set("metadata[merchant_id]", merchant.id);
     params.set("metadata[plan_id]", plan.id);
+    params.set("metadata[stripe_price_id]", plan.stripe_price_id);
     params.set("subscription_data[metadata][user_id]", user.id);
     params.set("subscription_data[metadata][merchant_id]", merchant.id);
     params.set("subscription_data[metadata][plan_id]", plan.id);
+    params.set("subscription_data[metadata][stripe_price_id]", plan.stripe_price_id);
     params.set("subscription_data[metadata][subscription_type]", "merchant");
 
     const stripeRes = await fetch("https://api.stripe.com/v1/checkout/sessions", { method: "POST", headers: { Authorization: `Bearer ${STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" }, body: params.toString() });
