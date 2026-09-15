@@ -56,6 +56,30 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default function CouponDetailLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+export default async function CouponDetailLayout({ children, params }: { children: React.ReactNode; params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const coupon = await getCoupon(id);
+  const schema = coupon
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Offer",
+        name: `${coupon.discount_text} ${coupon.title}`,
+        description: coupon.description || `${coupon.discount_text} deal from ${coupon.merchants?.business_name || "Coupon Queen Merchant"}.`,
+        url: `${siteUrl}/coupons/${coupon.id}`,
+        availability: "https://schema.org/InStock",
+        validFrom: coupon.starts_at || undefined,
+        validThrough: coupon.expires_at || undefined,
+        seller: coupon.merchants?.business_name
+          ? { "@type": "LocalBusiness", name: coupon.merchants.business_name, url: `${siteUrl}/businesses/${coupon.merchant_id}` }
+          : undefined,
+        category: coupon.categories?.name || undefined,
+      }
+    : null;
+
+  return (
+    <>
+      {schema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} /> : null}
+      {children}
+    </>
+  );
 }
