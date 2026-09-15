@@ -5,12 +5,17 @@ import "./queen-polish.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://couponqueen.online"),
-  title: "Coupon Queen | The Crown Jewel of Savings",
-  description: "Discover local deals, coupons, and savings with Coupon Queen — The Crown Jewel of Savings.",
+  title: {
+    default: "Coupon Queen | The Crown Jewel of Savings",
+    template: "%s | Coupon Queen",
+  },
+  description: "Find live coupons, local offers, and money-saving deals from participating businesses across the country. Coupon Queen is the Crown Jewel of Savings.",
+  applicationName: "Coupon Queen",
+  keywords: ["coupons", "deals", "discounts", "local deals", "savings", "merchant marketplace", "Coupon Queen"],
   alternates: { canonical: "/" },
   openGraph: {
     title: "Coupon Queen | The Crown Jewel of Savings",
-    description: "Discover local deals, coupons, and savings with Coupon Queen.",
+    description: "Find live coupons, local offers, and money-saving deals from participating businesses across the country.",
     url: "https://couponqueen.online",
     siteName: "Coupon Queen",
     type: "website",
@@ -18,7 +23,11 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: "Coupon Queen | The Crown Jewel of Savings",
-    description: "Discover local deals, coupons, and savings with Coupon Queen.",
+    description: "Find live coupons, local offers, and money-saving deals from participating businesses across the country.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
