@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import StructuredData from "./structured-data";
 import "./globals.css";
 import "./queen-polish.css";
 
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
+        <StructuredData />
         {children}
         <Analytics />
       </body>
