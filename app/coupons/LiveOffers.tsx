@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect } from "react";
 import type { Coupon } from "../../lib/coupons";
 import { SUPABASE_KEY, SUPABASE_URL } from "../../lib/supabase-config";
@@ -11,7 +10,7 @@ export default function LiveOffers({ onLoad }: { onLoad: (offers: Coupon[]) => v
         if (!SUPABASE_KEY) return;
 
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/coupons?status=eq.active&select=id,merchant_id,category_id,title,description,terms,discount_text,starts_at,expires_at,created_at,merchants(business_name,city,state),categories(name)&order=created_at.desc`,
+          `${SUPABASE_URL}/rest/v1/coupons?status=eq.active&starts_at=lte.${encodeURIComponent(new Date().toISOString())}&merchants.is_approved=eq.true&merchants.is_active=eq.true&select=id,merchant_id,category_id,title,description,terms,discount_text,starts_at,expires_at,created_at,merchants!inner(business_name,city,state,is_approved,is_active),categories(name)&order=created_at.desc`,
           {
             headers: { apikey: SUPABASE_KEY },
             cache: "no-store",
@@ -27,7 +26,8 @@ export default function LiveOffers({ onLoad }: { onLoad: (offers: Coupon[]) => v
             .filter((row: any) => {
               const starts = row.starts_at ? new Date(row.starts_at).getTime() : 0;
               const expires = row.expires_at ? new Date(row.expires_at).getTime() : Infinity;
-              return starts <= now && expires > now;
+              const merchant = row.merchants;
+              return starts <= now && expires > now && merchant?.is_approved === true && merchant?.is_active === true;
             })
             .map((row: any) => {
               const merchant = row.merchants;
